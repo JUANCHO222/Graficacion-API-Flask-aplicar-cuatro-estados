@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Propiedades de Imagenes</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+</head>
+<body>
+    <div class="container d-flex justify-content-center align-items-center">
+    <form method="POST" action="/transform" enctype="multipart/form-data">
+        <!-- Input para cargar la imagen -->
+        <input type="file" name="image" class="btn btn-primary"   accept="image/*" required>
+        <br><br>
+         <!-- Vista previa de la imagen -->
+         <img id="image_preview" src="" alt="Vista previa de la imagen">
+         <br><br>
+        <!-- Sliders -->
+        <label for="rotation">Rotación:</label>
+        <input type="range" id="rotation" name="rotation" min="0" max="360" step="1" value="0">
+        <br><br>
+        <label for="horizontal_flip">Traslación:</label>
+        <input type="range" id="horizontal_flip" name="horizontal_flip" min="-50" max="0" step="1" value="0">
+        <br><br>
+        <label for="vertical_flip">Escalamiento:</label>
+        <input type="range" id="vertical_flip" name="vertical_flip" min="1" max="3" step="1" value="0">
+        <br><br>
+        <label for="grayscalex">Recorte en X:</label>
+        <input type="range" id="grayscalex" name="grayscalex" min="0" max="5" step="1" value="0">
+        <br><br>
+        <label for="grayscaley">Recorte en Y:</label>
+        <input type="range" id="grayscaley" name="grayscaley" min="0" max="5" step="1" value="0">
+        <br><br>
+        <label for="escalagris">Transparencia:</label>
+        <input type="range" id="escalagris" name="escalagris" min="0" max="5" step="1" value="0">
+        <br><br>
+
+        <!-- Botón para aplicar transformaciones -->
+        <button type="button" class="btn btn-success" onclick="saveImage()">Aplicar Transformaciones</button>
+    </form>
+    </div>
+    
+
+    <script>
+        // Función para actualizar la vista previa de la imagen en tiempo real
+        function updateImagePreview() {
+            // Obtener el elemento de entrada de archivos
+            var fileInput = document.querySelector('input[type="file"]');
+
+            // Obtener los valores de los sliders
+            var rotation = document.getElementById("rotation").value;
+            var horizontalFlip = document.getElementById("horizontal_flip").value;
+            var verticalFlip = document.getElementById("vertical_flip").value;
+            var grayscalex = document.getElementById("grayscalex").value;
+            var grayscaley = document.getElementById("grayscaley").value;
+            var escalagris = document.getElementById("escalagris").value;
+           
+            // Crear un objeto FormData para enviar los valores al servidor
+            var formData = new FormData();
+            formData.append('image', fileInput.files[0]);
+            formData.append('rotation', rotation);
+            formData.append('horizontal_flip', horizontalFlip);
+            formData.append('vertical_flip', verticalFlip);
+            formData.append('grayscalex', grayscalex);
+            formData.append('grayscaley', grayscaley);
+            formData.append('escalagris', escalagris);
+           
+            // Realizar una solicitud POST al servidor
+            fetch('/transform', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.text())
+            .then(data => {
+                // Actualizar la vista previa de la imagen con la imagen resultante
+                document.getElementById("image_preview").src = 'data:image/jpeg;base64,' + data;
+                console.log(data)
+            });
+        }
+        
+        function saveImage() {
+            // Obtener la imagen codificada en base64
+            var encodedImage = document.getElementById("image_preview").src;
+
+            // Crear un enlace de descarga
+            var downloadLink = document.createElement("a");
+            downloadLink.href = encodedImage;
+            downloadLink.download = "imagen_transformada.jpg";
+
+            // Simular un clic en el enlace para iniciar la descarga
+            downloadLink.style.display = "none"; // Ocultar el enlace
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink); // Eliminar el enlace después de hacer clic
+        }       
+
+        
+        // Escuchar cambios en los sliders
+        document.getElementById("rotation").addEventListener("input", updateImagePreview);
+        document.getElementById("horizontal_flip").addEventListener("input", updateImagePreview);
+        document.getElementById("vertical_flip").addEventListener("input", updateImagePreview);
+        document.getElementById("grayscalex").addEventListener("input", updateImagePreview);
+        document.getElementById("grayscaley").addEventListener("input", updateImagePreview);
+        document.getElementById("escalagris").addEventListener("input", updateImagePreview);
+        
+        // Escuchar cambios en la carga de imágenes
+        document.querySelector('input[type="file"]').addEventListener("change", updateImagePreview);
+
+        // Inicializar la vista previa de la imagen
+        updateImagePreview();
+    </script>
+</body>
+</html>
